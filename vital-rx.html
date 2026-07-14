@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#211a2b">
+<title>Vital Rx — Daily Log</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&display=swap');
+:root{--bg:#211a2b;--card:#2d2438;--card2:#372d45;--line:rgba(240,230,245,.09);--text:#f1eaf4;--muted:#a795b8;--rose:#e89db4;--rose-dim:rgba(232,157,180,.16);--amber:#e5b876;--sage:#a3c39b;--sage-dim:rgba(163,195,155,.16);--blue:#8fc7de}
+*{box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:'Karla',system-ui,sans-serif;padding-bottom:90px}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:26px;margin:0;letter-spacing:.2px}
+.date{color:var(--muted);font-size:14px;margin-top:2px}
+.sec{font-family:'Fraunces',serif;font-size:17px;font-weight:600;margin:26px 0 10px}
+.sec small{font-weight:400;font-size:12.5px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.medcard{cursor:pointer;user-select:none;-webkit-user-select:none}
+.medcard:active{background:var(--card2)}
+.medrow{display:flex;align-items:center;gap:12px}
+.pill{width:54px;height:54px;border-radius:999px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:20px;background:transparent;flex-shrink:0;transition:all .18s ease}
+.pill.on.rose{background:var(--rose);border-color:var(--rose);color:#3a1f2a}
+.pill.on.amber{background:var(--amber);border-color:var(--amber);color:#3a2d14}
+.pill.on.sage{background:var(--sage);border-color:var(--sage);color:#22301f}
+.medname{font-weight:700;font-size:15px}
+.medsub{color:var(--muted);font-size:12.5px;margin-top:1px}
+.medmain{flex:1;min-width:0}
+.timebox{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+input[type=time],input[type=number],input[type=text],select,textarea{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px;font-family:inherit;font-size:15px}
+input[type=time]{width:118px}
+input:focus-visible,textarea:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.lbl{font-size:12.5px;color:var(--muted)}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:999px;padding:7px 13px;font-size:13.5px;cursor:pointer;font-family:inherit;transition:all .15s}
+.chip.on{background:var(--rose-dim);border-color:var(--rose);color:var(--rose);font-weight:700}
+.scale{display:flex;gap:6px;align-items:center}
+.scale button{flex:1;padding:9px 0;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-family:inherit;font-size:14px;cursor:pointer;font-weight:600}
+.scale button.on{background:var(--sage-dim);border-color:var(--sage);color:var(--sage)}
+.scale .hint{font-size:11.5px;color:var(--muted);white-space:nowrap;padding-left:4px}
+textarea{width:100%;min-height:64px;resize:vertical}
+.btn{border:1px solid var(--line);border-radius:12px;padding:11px 16px;font-family:inherit;font-weight:700;font-size:14.5px;cursor:pointer;background:var(--card2);color:var(--text)}
+.btn.primary{background:var(--rose);color:#3a1f2a;border-color:var(--rose)}
+.btn.small{padding:7px 12px;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.4;cursor:default}
+.food{display:flex;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:14.5px;align-items:flex-start}
+.food:last-child{border-bottom:none}
+.ftime{color:var(--amber);font-weight:700;font-size:13px;white-space:nowrap}
+.fmac{color:var(--muted);font-size:12.5px;margin-top:2px}
+.del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.g4 input,.g2 input{width:100%}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#1a1424;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:10}
+.tabs-in{display:flex;width:100%;max-width:560px}
+.tab{flex:1;padding:13px 0 max(13px,env(safe-area-inset-bottom));background:none;border:none;color:var(--muted);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.tab.on{color:var(--rose)}
+.hday{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer}
+.hhead{display:flex;justify-content:space-between;align-items:center}
+.dots{display:flex;gap:5px}
+.dot{width:11px;height:11px;border-radius:999px;border:1.5px solid var(--line)}
+.dot.rose{background:var(--rose);border-color:var(--rose)}
+.dot.amber{background:var(--amber);border-color:var(--amber)}
+.dot.sage{background:var(--sage);border-color:var(--sage)}
+.hbody{margin-top:10px;font-size:13.5px;color:var(--muted);line-height:1.55}
+.hbody b{color:var(--text)}
+.report{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px;font-family:ui-monospace,Menlo,monospace;font-size:12px;white-space:pre-wrap;line-height:1.5;max-height:340px;overflow-y:auto;color:#dcd2e4}
+.note{color:var(--muted);font-size:13px;line-height:1.5}
+.note b{color:var(--text)}
+.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--sage);color:#22301f;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.statnum{font-family:'Fraunces',serif;font-size:21px;font-weight:600}
+.statlbl{color:var(--muted);font-size:11.5px;margin-top:2px}
+.fxrow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.fxname{width:128px;font-size:13px;flex-shrink:0}
+.fxtrack{flex:1;height:14px;background:var(--card2);border-radius:999px;overflow:hidden}
+.fxbar{height:100%;background:var(--rose);border-radius:999px}
+.fxn{font-size:12px;color:var(--muted);width:52px;text-align:right;flex-shrink:0}
+.h2o{display:flex;align-items:flex-end;gap:4px;height:110px;margin-top:8px}
+.h2ocol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.h2obar{width:100%;max-width:26px;background:var(--blue);border-radius:6px 6px 0 0;min-height:2px}
+.h2ooz{font-size:9.5px;color:var(--muted);margin-bottom:3px}
+.h2oday{font-size:9.5px;color:var(--muted);margin-top:4px;white-space:nowrap}
+.wcount{color:var(--muted);font-size:13px;align-self:center}
+.wcount b{color:var(--text)}
+label.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer}
+label.chk input{width:18px;height:18px;accent-color:var(--amber)}
+.daynav{display:flex;gap:8px;align-items:center;margin:16px 0 6px;flex-wrap:wrap}
+.daynav input[type=date]{flex:1;min-width:140px;max-width:200px}
+.daynav .btn{padding:8px 14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast">Saved ✓</div>
+<div class="wrap">
+  <h1>Daily log</h1>
+  <div class="date" id="hdr"></div>
+  <div id="view"></div>
+</div>
+<nav class="tabs" aria-label="Sections"><div class="tabs-in">
+  <button class="tab on" data-tab="today" type="button">Today</button>
+  <button class="tab" data-tab="history" type="button">History</button>
+  <button class="tab" data-tab="report" type="button">Doctor report</button>
+</div></nav>
+
+<script>
+"use strict";
+/* ============ Vital Rx — standalone (localStorage) ============ */
+const VERSION = "web-1.1";
+const ADDINS = ["Nothing added","Salud Energy","Salud Hydration","Salud Greens"];
+const EFFECTS = ["Nausea","Headache","Fatigue","Bloating","Constipation","Dizziness","Breast tenderness","Acne","Hot flashes","Spotting","Mood swings","Cravings down","Brain fog","Better sleep"];
+const MEDS = [
+  {id:"prog", name:"Progesterone 200 mg", sub:"1 capsule by mouth · ~1 hr before bed", color:"rose", icon:"🌙"},
+  {id:"testo", name:"Testosterone 1% cream", sub:"5 mg (2 clicks) topical · on waking", color:"amber", icon:"☀️"},
+  {id:"glp", name:"Tirzepatide 3 mg (oral)", sub:"Chew & swallow ½ tablet · once daily", color:"sage", icon:"💊"},
+];
+
+/* ---------- helpers ---------- */
+const pad = n => String(n).padStart(2,"0");
+const todayKey = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const nowTime = () => { const d=new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtDate = iso => { const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); };
+const fmt12 = t => { if(!t) return "—"; const [h,m]=t.split(":").map(Number); const ap=h>=12?"PM":"AM"; return `${((h+11)%12)+1}:${pad(m)} ${ap}`; };
+const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const to24 = s => { const m=s.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i); if(!m) return ""; let h=Number(m[1]); if(m[3].toUpperCase()==="PM"&&h!==12)h+=12; if(m[3].toUpperCase()==="AM"&&h===12)h=0; return `${pad(h)}:${m[2]}`; };
+
+const emptyDay = () => ({
+  meds:{ prog:{taken:false,time:""}, testo:{taken:false,time:"",clicks:"2",unsure:false}, glp:{taken:false,time:""} },
+  checkin:{ mood:0, energy:0, appetite:0, effects:[], notes:"" },
+  food:[], water:0, drinks:[],
+  supp:{ collagen:{taken:false,time:""} },
+  body:{ weight:"", waist:"", hips:"", chest:"" },
+});
+const mergeDay = d => !d ? emptyDay() : ({ ...emptyDay(), ...d,
+  meds:{...emptyDay().meds, ...(d.meds||{})},
+  checkin:{...emptyDay().checkin, ...(d.checkin||{})},
+  supp:{...emptyDay().supp, ...(d.supp||{})},
+  body:{...emptyDay().body, ...(d.body||{})},
+  food:d.food||[], drinks:d.drinks||[] });
+const totalOz = d => (d.drinks||[]).reduce((s,x)=>s+(Number(x.oz)||0),0) + (d.water||0)*8;
+
+/* ---------- storage (localStorage) ---------- */
+const store = {
+  get(k){ try{ const v=localStorage.getItem("vitalrx:"+k); return v?JSON.parse(v):null; }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem("vitalrx:"+k, JSON.stringify(v)); return true; }catch(e){ return false; } },
+  listDays(){ const out=[]; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith("vitalrx:day:")){ const date=k.replace("vitalrx:day:",""); const d=this.get("day:"+date); if(d) out.push({date, data:mergeDay(d)}); } } }catch(e){} out.sort((a,b)=>b.date.localeCompare(a.date)); return out; },
+};
+
+/* ---------- state ---------- */
+let curDate = todayKey();
+let day = mergeDay(store.get("day:"+curDate));
+let tab = "today";
+function setDate(d){
+  if(!d) return;
+  if(d>todayKey()) d=todayKey();
+  curDate=d; day=mergeDay(store.get("day:"+curDate));
+  ui.showBody=!!(day.body.weight||day.body.waist||day.body.hips||day.body.chest);
+  render();
+}
+function shiftDate(n){ const [y,m,dd]=curDate.split("-").map(Number); const dt=new Date(y,m-1,dd+n); setDate(`${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`); }
+let ui = { showMacros:false, showBody:!!(day.body.weight||day.body.waist||day.body.hips||day.body.chest), openHist:null, range:"14", backupText:"", restoreMsg:"" };
+
+let toastTimer=null;
+function save(rerender=true){
+  const ok = store.set("day:"+curDate, day);
+  const t=document.getElementById("toast");
+  t.textContent = ok ? "Saved ✓" : "Save failed — storage blocked?";
+  t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1100);
+  if(rerender) render();
+}
+
+/* ---------- report / csv / parser ---------- */
+function buildReport(days){
+  const sorted=[...days].sort((a,b)=>a.date.localeCompare(b.date));
+  if(!sorted.length) return "No entries yet.";
+  const L=[];
+  L.push("MEDICATION, SYMPTOM & INTAKE LOG");
+  L.push("Patient: Shannon M. Allen");
+  L.push(`Period: ${fmtDate(sorted[0].date)} – ${fmtDate(sorted[sorted.length-1].date)}  (${sorted.length} logged day${sorted.length>1?"s":""})`);
+  L.push("");
+  L.push("REGIMEN");
+  L.push("• Progesterone 200 mg cap — 1 by mouth daily, ~1 hr before bedtime (target ~9 PM)");
+  L.push("• Testosterone 1% cream — 5 mg (2 clicks) topical daily on waking (pen click dosing inconsistent; actual clicks logged)");
+  L.push("• Tirzepatide 3 mg oral tablet — chew & swallow ½ tablet once daily (started 07/13/2026)");
+  L.push("• Vital Proteins collagen — 1 scoop in morning coffee (supplement)");
+  L.push("• Salud drink packets (Energy / Hydration / Greens) — occasional add-in to water, logged per drink");
+  L.push("");
+  const cnt={prog:0,testo:0,glp:0}; const effTally={}; const moods=[],energies=[],appetites=[],weights=[];
+  sorted.forEach(d=>{
+    ["prog","testo","glp"].forEach(m=>{ if(d.data.meds[m]?.taken) cnt[m]++; });
+    (d.data.checkin.effects||[]).forEach(e=>{ effTally[e]=(effTally[e]||0)+1; });
+    if(d.data.checkin.mood) moods.push(d.data.checkin.mood);
+    if(d.data.checkin.energy) energies.push(d.data.checkin.energy);
+    if(d.data.checkin.appetite) appetites.push(d.data.checkin.appetite);
+    if(d.data.body.weight) weights.push({date:d.date,w:d.data.body.weight});
+  });
+  const avg=a=>a.length?(a.reduce((s,x)=>s+Number(x),0)/a.length).toFixed(1):"—";
+  L.push("SUMMARY");
+  L.push(`• Doses logged: progesterone ${cnt.prog}/${sorted.length} · testosterone ${cnt.testo}/${sorted.length} · tirzepatide ${cnt.glp}/${sorted.length} days`);
+  L.push(`• Avg mood ${avg(moods)}/5 · energy ${avg(energies)}/5 · appetite ${avg(appetites)}/5 (1 = none, 5 = very hungry)`);
+  const topEff=Object.entries(effTally).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(topEff.length) L.push(`• Most frequent effects: ${topEff.map(([e,n])=>`${e} (${n}d)`).join(", ")}`);
+  const ozs=sorted.map(d=>totalOz(d.data)).filter(o=>o>0);
+  if(ozs.length) L.push(`• Fluids: avg ${avg(ozs)} oz/day on logged days`);
+  const saludTally={};
+  sorted.forEach(d=>(d.data.drinks||[]).forEach(dr=>{ if(dr.addin&&dr.addin!=="Nothing added") saludTally[dr.addin]=(saludTally[dr.addin]||0)+1; }));
+  if(Object.keys(saludTally).length) L.push(`• Drink add-ins: ${Object.entries(saludTally).map(([a,n])=>`${a} ×${n}`).join(", ")}`);
+  const collDays=sorted.filter(d=>d.data.supp?.collagen?.taken).length;
+  if(collDays) L.push(`• Vital Proteins collagen (in coffee): ${collDays}/${sorted.length} days`);
+  const unsureDays=sorted.filter(d=>d.data.meds.testo?.taken&&d.data.meds.testo?.unsure).length;
+  if(unsureDays) L.push(`• Testosterone dose uncertain (pen clicks hard to read): ${unsureDays}/${cnt.testo} applied days`);
+  if(weights.length>=2) L.push(`• Weight: ${weights[0].w} → ${weights[weights.length-1].w} lb`);
+  else if(weights.length===1) L.push(`• Weight: ${weights[0].w} lb`);
+  L.push(""); L.push("DAILY LOG"); L.push("─".repeat(44));
+  sorted.forEach(d=>{
+    const m=d.data.meds,c=d.data.checkin;
+    L.push(`${fmtDate(d.date)} (${d.date})`);
+    L.push(`  Progesterone: ${m.prog?.taken?`taken ${fmt12(m.prog.time)}`:"not logged"}`);
+    L.push(`  Testosterone: ${m.testo?.taken?`applied ${fmt12(m.testo.time)}${m.testo.clicks?`, ${m.testo.clicks} click${m.testo.clicks==="1"?"":"s"}`:""}${m.testo.unsure?" (dose uncertain — clicks hard to read)":""}`:"not logged"}`);
+    L.push(`  Tirzepatide:  ${m.glp?.taken?`taken ${fmt12(m.glp.time)}`:"not logged"}`);
+    const sc=[]; if(c.mood)sc.push(`mood ${c.mood}/5`); if(c.energy)sc.push(`energy ${c.energy}/5`); if(c.appetite)sc.push(`appetite ${c.appetite}/5`);
+    if(sc.length) L.push(`  Feeling: ${sc.join(" · ")}`);
+    if(c.effects?.length) L.push(`  Effects: ${c.effects.join(", ")}`);
+    if(c.notes) L.push(`  Notes: ${c.notes}`);
+    if(d.data.food?.length){
+      L.push("  Food:");
+      d.data.food.forEach(f=>{
+        const mac=[f.cal&&`${f.cal} kcal`,f.protein&&`${f.protein}g P`,f.carbs&&`${f.carbs}g C`,f.fat&&`${f.fat}g F`].filter(Boolean).join(", ");
+        L.push(`    ${fmt12(f.time)} — ${f.desc}${mac?` (${mac})`:""}`);
+      });
+    }
+    if(d.data.supp?.collagen?.taken) L.push(`  Collagen (Vital Proteins, in coffee): ${fmt12(d.data.supp.collagen.time)}`);
+    const oz=totalOz(d.data);
+    if(oz>0){
+      const bits=(d.data.drinks||[]).map(dr=>`${dr.oz} oz${dr.addin&&dr.addin!=="Nothing added"?` + ${dr.addin}`:""}`);
+      if(d.data.water) bits.push(`${d.data.water*8} oz (glasses)`);
+      L.push(`  Fluids: ${oz} oz total${bits.length?` — ${bits.join(", ")}`:""}`);
+    }
+    const b=d.data.body;
+    const meas=[b.weight&&`weight ${b.weight} lb`,b.waist&&`waist ${b.waist}"`,b.hips&&`hips ${b.hips}"`,b.chest&&`chest ${b.chest}"`].filter(Boolean).join(" · ");
+    if(meas) L.push(`  Body: ${meas}`);
+    L.push("");
+  });
+  L.push("Generated with a personal tracking app — patient-reported data.");
+  return L.join("\n");
+}
+
+function buildCSV(days){
+  const sorted=[...days].sort((a,b)=>a.date.localeCompare(b.date));
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  const rows=[["date","progesterone_taken","progesterone_time","testosterone_taken","testosterone_time","testosterone_clicks","testosterone_dose_unsure","tirzepatide_taken","tirzepatide_time","collagen_taken","collagen_time","mood_1to5","energy_1to5","appetite_1to5","side_effects","notes","food_log","fluids_oz","drink_detail","weight_lb","waist_in","hips_in","chest_in"].join(",")];
+  sorted.forEach(d=>{
+    const m=d.data.meds,c=d.data.checkin,b=d.data.body;
+    const food=(d.data.food||[]).map(f=>{
+      const mac=[f.cal&&`${f.cal}kcal`,f.protein&&`${f.protein}gP`,f.carbs&&`${f.carbs}gC`,f.fat&&`${f.fat}gF`].filter(Boolean).join(" ");
+      return `${f.time} ${f.desc}${mac?` [${mac}]`:""}`;
+    }).join(" | ");
+    const dd=[...(d.data.drinks||[]).map(dr=>`${dr.time||""} ${dr.oz}oz${dr.addin&&dr.addin!=="Nothing added"?` +${dr.addin}`:""}`.trim()), ...(d.data.water?[`${d.data.water*8}oz glasses`]:[])].join(" | ");
+    const coll=d.data.supp?.collagen||{};
+    rows.push([d.date, m.prog?.taken?"yes":"no", m.prog?.time||"", m.testo?.taken?"yes":"no", m.testo?.time||"", m.testo?.clicks||"", m.testo?.unsure?"yes":"no", m.glp?.taken?"yes":"no", m.glp?.time||"", coll.taken?"yes":"no", coll.time||"", c.mood||"", c.energy||"", c.appetite||"", q((c.effects||[]).join("; ")), q(c.notes), q(food), totalOz(d.data)||"", q(dd), b.weight||"", b.waist||"", b.hips||"", b.chest||""].join(","));
+  });
+  return rows.join("\n");
+}
+
+function parseReport(text){
+  const days=[];
+  const blocks=text.split(/\n(?=[A-Za-z]{3},? [A-Za-z]{3} \d{1,2} \(\d{4}-\d{2}-\d{2}\))/);
+  for(const block of blocks){
+    const dm=block.match(/\((\d{4}-\d{2}-\d{2})\)/);
+    if(!dm) continue;
+    const data=emptyDay(); const lines=block.split("\n"); let inFood=false;
+    for(const raw of lines){
+      const line=raw.trim();
+      if(inFood && raw.startsWith("    ") && line.includes("—")){
+        const fm=line.match(/^(.+?)\s+—\s+(.*)$/);
+        if(fm){
+          const entry={time:to24(fm[1]),desc:fm[2]};
+          const macm=entry.desc.match(/\s*\(([^)]*(?:kcal|g P|g C|g F)[^)]*)\)\s*$/);
+          if(macm){
+            entry.desc=entry.desc.replace(macm[0],"").trim();
+            const g=re=>{const x=macm[1].match(re);return x?x[1]:"";};
+            entry.cal=g(/(\d+(?:\.\d+)?)\s*kcal/); entry.protein=g(/(\d+(?:\.\d+)?)g P/);
+            entry.carbs=g(/(\d+(?:\.\d+)?)g C/); entry.fat=g(/(\d+(?:\.\d+)?)g F/);
+          }
+          data.food.push(entry); continue;
+        }
+      }
+      inFood=false;
+      if(line.startsWith("Progesterone:")){ if(line.includes("taken")) data.meds.prog={taken:true,time:to24(line)}; }
+      else if(line.startsWith("Testosterone:")){
+        if(line.includes("applied")){
+          const cm=line.match(/([\d.]+|unsure)\s+clicks?/i);
+          data.meds.testo={taken:true,time:to24(line),clicks:cm&&cm[1]!=="unsure"?cm[1]:"2",unsure:/uncertain|unsure/i.test(line)};
+        }
+      }
+      else if(line.startsWith("Tirzepatide:")){ if(line.includes("taken")) data.meds.glp={taken:true,time:to24(line)}; }
+      else if(line.startsWith("Collagen")){ data.supp.collagen={taken:true,time:to24(line)}; }
+      else if(line.startsWith("Feeling:")){
+        const g=re=>{const x=line.match(re);return x?Number(x[1]):0;};
+        data.checkin.mood=g(/mood (\d)/); data.checkin.energy=g(/energy (\d)/); data.checkin.appetite=g(/appetite (\d)/);
+      }
+      else if(line.startsWith("Effects:")) data.checkin.effects=line.replace("Effects:","").split(",").map(s=>s.trim()).filter(Boolean);
+      else if(line.startsWith("Notes:")) data.checkin.notes=line.replace("Notes:","").trim();
+      else if(line.startsWith("Food:")) inFood=true;
+      else if(line.startsWith("Fluids:")){
+        const parts=line.split("—")[1];
+        if(parts){
+          parts.split(",").forEach(p=>{
+            const t=p.trim(); const om=t.match(/^([\d.]+)\s*oz/); if(!om) return;
+            const oz=Number(om[1]);
+            if(/glasses/i.test(t)){ data.water=Math.round(oz/8); return; }
+            const am=t.match(/\+\s*(.+)$/);
+            data.drinks.push({type:oz>=20?"yeti":"glass",oz,addin:am?am[1].trim():"Nothing added",time:""});
+          });
+        } else {
+          const om=line.match(/Fluids:\s*([\d.]+)\s*oz/);
+          if(om) data.water=Math.round(Number(om[1])/8);
+        }
+      }
+      else if(line.startsWith("Water:")){ const wm=line.match(/([\d.]+)\s*glasses/); if(wm) data.water=Number(wm[1]); }
+      else if(line.startsWith("Body:")){
+        const g=re=>{const x=line.match(re);return x?x[1]:"";};
+        data.body.weight=g(/weight\s+([\d.]+)/); data.body.waist=g(/waist\s+([\d.]+)/);
+        data.body.hips=g(/hips\s+([\d.]+)/); data.body.chest=g(/chest\s+([\d.]+)/);
+      }
+    }
+    days.push({date:dm[1],data});
+  }
+  return days;
+}
+
+/* ---------- render ---------- */
+const view = () => document.getElementById("view");
+
+function render(){
+  const isToday = curDate===todayKey();
+  document.getElementById("hdr").textContent = `${isToday?"Today · ":""}${fmtDate(curDate)} · Shannon · ${VERSION}`;
+  document.querySelector(".tab[data-tab=today]").textContent = isToday?"Today":"Edit day";
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+  if(tab==="today") renderToday();
+  else if(tab==="history") renderHistory();
+  else renderReport();
+}
+
+function medCardHTML(m){
+  const st=day.meds[m.id];
+  return `<div class="card medcard" data-med="${m.id}" role="button" tabindex="0" aria-pressed="${st.taken}">
+    <div class="medrow">
+      <span class="pill ${st.taken?"on":""} ${m.color}" aria-hidden="true">${st.taken?"✓":m.icon}</span>
+      <div class="medmain">
+        <div class="medname">${m.name}</div>
+        <div class="medsub">${st.taken?"Logged — tap to undo":m.sub+" · tap when taken"}</div>
+      </div>
+    </div>
+    ${st.taken?`<div class="timebox" data-stop="1">
+      <span class="lbl">Actual time</span>
+      <input type="time" value="${st.time}" data-medtime="${m.id}" aria-label="Time taken">
+      ${m.id==="testo"?`
+        <span class="lbl">Clicks</span>
+        <select data-clicks="1" aria-label="Clicks dispensed">${["0.5","1","1.5","2","2.5","3"].map(c=>`<option ${st.clicks===c?"selected":""}>${c}</option>`).join("")}</select>
+        <label class="chk"><input type="checkbox" data-unsure="1" ${st.unsure?"checked":""}> Unsure — clicks hard to tell</label>`:""}
+    </div>`:""}
+  </div>`;
+}
+
+function scaleHTML(field,hint){
+  return `<div class="scale" role="radiogroup" aria-label="${field}">
+    ${[1,2,3,4,5].map(n=>`<button type="button" data-scale="${field}" data-val="${n}" class="${day.checkin[field]===n?"on":""}" aria-pressed="${day.checkin[field]===n}">${n}</button>`).join("")}
+    <span class="hint">${hint}</span></div>`;
+}
+
+function renderToday(){
+  const c=day.supp.collagen;
+  const isToday=curDate===todayKey();
+  view().innerHTML = `
+  <div class="daynav">
+    <button type="button" class="btn small" id="prevday" aria-label="Previous day">‹</button>
+    <input type="date" id="datepick" value="${curDate}" max="${todayKey()}" aria-label="Pick a day to edit">
+    <button type="button" class="btn small" id="nextday" ${isToday?"disabled":""} aria-label="Next day">›</button>
+    ${!isToday?`<button type="button" class="btn small" id="jumptoday">Back to today</button>`:""}
+  </div>
+  ${!isToday?`<p class="note" style="margin:0 0 4px"><b>Editing a past day.</b> Times won't auto-fill — set them to when things actually happened.</p>`:""}
+  <div class="sec">Medications</div>
+  ${MEDS.map(medCardHTML).join("")}
+
+  <div class="sec">Supplements</div>
+  <div class="card medcard" data-collagen="1" role="button" tabindex="0" aria-pressed="${c.taken}">
+    <div class="medrow">
+      <span class="pill ${c.taken?"on":""} rose" aria-hidden="true">${c.taken?"✓":"☕"}</span>
+      <div class="medmain">
+        <div class="medname">Vital Proteins collagen</div>
+        <div class="medsub">${c.taken?"Logged — tap to undo":"1 scoop in morning coffee · tap when taken"}</div>
+      </div>
+    </div>
+    ${c.taken?`<div class="timebox" data-stop="1">
+      <span class="lbl">Actual time</span>
+      <input type="time" value="${c.time}" data-collagentime="1" aria-label="Time collagen taken">
+    </div>`:""}
+  </div>
+
+  <div class="sec">How you're feeling</div>
+  <div class="card">
+    <div class="lbl" style="margin-bottom:6px">Mood</div>${scaleHTML("mood","1 low → 5 great")}
+    <div class="lbl" style="margin:12px 0 6px">Energy</div>${scaleHTML("energy","1 drained → 5 high")}
+    <div class="lbl" style="margin:12px 0 6px">Appetite</div>${scaleHTML("appetite","1 none → 5 very hungry")}
+    <div class="lbl" style="margin:14px 0 8px">Anything noticeable today?</div>
+    <div class="chiprow">${EFFECTS.map(e=>`<button type="button" class="chip ${day.checkin.effects.includes(e)?"on":""}" data-effect="${esc(e)}" aria-pressed="${day.checkin.effects.includes(e)}">${e}</button>`).join("")}</div>
+    <div class="lbl" style="margin:14px 0 6px">Notes for Dr. Neal</div>
+    <textarea id="notes" placeholder="Anything else — sleep, cycle, stress, how doses felt…">${esc(day.checkin.notes)}</textarea>
+  </div>
+
+  <div class="sec">Food</div>
+  <div class="card">
+    ${day.food.length===0?`<p class="note" style="margin:2px 0 10px">Nothing logged yet. A quick description is all your doctor needs — macros are a bonus.</p>`:""}
+    ${day.food.map((f,i)=>`<div class="food">
+      <div><span class="ftime">${fmt12(f.time)}</span>&nbsp; ${esc(f.desc)}
+        ${(f.cal||f.protein||f.carbs||f.fat)?`<div class="fmac">${[f.cal&&`${f.cal} kcal`,f.protein&&`${f.protein}g protein`,f.carbs&&`${f.carbs}g carbs`,f.fat&&`${f.fat}g fat`].filter(Boolean).join(" · ")}</div>`:""}
+      </div>
+      <button type="button" class="del" data-delfood="${i}" aria-label="Delete food entry">✕</button>
+    </div>`).join("")}
+    <div style="margin-top:10px">
+      <div class="g2">
+        <input type="text" id="fdesc" placeholder="What did you eat?" aria-label="Food description">
+        <input type="time" id="ftime" value="${isToday?nowTime():""}" style="width:100%" aria-label="Time eaten">
+      </div>
+      ${ui.showMacros?`<div class="g4" style="margin-top:8px">
+        <input type="number" inputmode="numeric" id="fcal" placeholder="kcal">
+        <input type="number" inputmode="numeric" id="fpro" placeholder="protein g">
+        <input type="number" inputmode="numeric" id="fcarb" placeholder="carbs g">
+        <input type="number" inputmode="numeric" id="ffat" placeholder="fat g">
+      </div>`:""}
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button type="button" class="btn primary" id="addfood">Add food</button>
+        <button type="button" class="btn small" id="togglemacros" style="align-self:center">${ui.showMacros?"Hide macros":"+ Macros (optional)"}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Water &amp; drinks</div>
+  <div class="card">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn primary" data-drink="yeti">+ Yeti (26 oz)</button>
+      <button type="button" class="btn" data-drink="glass">+ Glass (8 oz)</button>
+      <span class="wcount"><b>${totalOz(day)} oz</b> today</span>
+    </div>
+    ${(day.drinks||[]).length?`<div style="margin-top:10px">${day.drinks.map((dr,i)=>`<div class="food">
+      <div style="flex:1"><span class="ftime">${fmt12(dr.time)}</span>&nbsp; ${dr.type==="yeti"?"💧 Yeti · 26 oz":"💧 Glass · 8 oz"}
+        <div style="margin-top:6px"><select data-addin="${i}" style="font-size:13px" aria-label="Add-in">${ADDINS.map(a=>`<option ${dr.addin===a?"selected":""}>${a}</option>`).join("")}</select></div>
+      </div>
+      <button type="button" class="del" data-deldrink="${i}" aria-label="Delete drink">✕</button>
+    </div>`).join("")}</div>`:`<p class="note" style="margin:10px 0 0">Tap when you fill up — then tag it if you dropped in a Salud packet.</p>`}
+  </div>
+
+  <div class="sec">Body <small>(optional)</small></div>
+  <div class="card">
+    ${!ui.showBody?`<button type="button" class="btn small" id="showbody">Log weight / measurements</button>`
+    :`<div class="g4">${[["weight","lb"],["waist","in"],["hips","in"],["chest","in"]].map(([f,u])=>`<div>
+        <div class="lbl" style="margin-bottom:4px;text-transform:capitalize">${f} (${u})</div>
+        <input type="number" inputmode="decimal" data-body="${f}" value="${esc(day.body[f])}" aria-label="${f}">
+      </div>`).join("")}</div>`}
+  </div>`;
+  bindToday();
+}
+
+function bindToday(){
+  const isToday=curDate===todayKey();
+  document.getElementById("prevday").addEventListener("click",()=>shiftDate(-1));
+  document.getElementById("nextday").addEventListener("click",()=>shiftDate(1));
+  document.getElementById("datepick").addEventListener("change",e=>setDate(e.target.value));
+  const jt=document.getElementById("jumptoday"); if(jt) jt.addEventListener("click",()=>setDate(todayKey()));
+  const defTime={prog:"21:00",glp:"21:00",testo:"08:00"};
+  view().querySelectorAll("[data-med]").forEach(el=>{
+    const id=el.dataset.med;
+    const toggle=()=>{ const cur=day.meds[id]; cur.taken=!cur.taken; if(cur.taken&&!cur.time) cur.time=isToday?nowTime():(defTime[id]||""); save(); };
+    el.addEventListener("click",e=>{ if(e.target.closest("[data-stop]")) return; toggle(); });
+    el.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&!e.target.closest("[data-stop]")){ e.preventDefault(); toggle(); } });
+  });
+  view().querySelectorAll("[data-medtime]").forEach(inp=>inp.addEventListener("change",e=>{ day.meds[inp.dataset.medtime].time=e.target.value; save(false); }));
+  const clicks=view().querySelector("[data-clicks]"); if(clicks) clicks.addEventListener("change",e=>{ day.meds.testo.clicks=e.target.value; save(false); });
+  const unsure=view().querySelector("[data-unsure]"); if(unsure) unsure.addEventListener("change",e=>{ day.meds.testo.unsure=e.target.checked; save(false); });
+
+  const coll=view().querySelector("[data-collagen]");
+  if(coll){
+    const toggle=()=>{ const c=day.supp.collagen; c.taken=!c.taken; if(c.taken&&!c.time) c.time=isToday?nowTime():"09:00"; save(); };
+    coll.addEventListener("click",e=>{ if(e.target.closest("[data-stop]")) return; toggle(); });
+    coll.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&!e.target.closest("[data-stop]")){ e.preventDefault(); toggle(); } });
+  }
+  const ct=view().querySelector("[data-collagentime]"); if(ct) ct.addEventListener("change",e=>{ day.supp.collagen.time=e.target.value; save(false); });
+
+  view().querySelectorAll("[data-scale]").forEach(b=>b.addEventListener("click",()=>{
+    const f=b.dataset.scale,n=Number(b.dataset.val);
+    day.checkin[f]=day.checkin[f]===n?0:n; save();
+  }));
+  view().querySelectorAll("[data-effect]").forEach(b=>b.addEventListener("click",()=>{
+    const e=b.dataset.effect; const arr=day.checkin.effects;
+    day.checkin.effects=arr.includes(e)?arr.filter(x=>x!==e):[...arr,e]; save();
+  }));
+  const notes=document.getElementById("notes");
+  let nt=null; notes.addEventListener("input",()=>{ day.checkin.notes=notes.value; clearTimeout(nt); nt=setTimeout(()=>save(false),600); });
+
+  document.getElementById("togglemacros").addEventListener("click",()=>{ ui.showMacros=!ui.showMacros; render(); });
+  document.getElementById("addfood").addEventListener("click",()=>{
+    const desc=document.getElementById("fdesc").value.trim();
+    if(!desc) return;
+    const entry={time:document.getElementById("ftime").value||nowTime(),desc};
+    if(ui.showMacros){
+      entry.cal=document.getElementById("fcal").value; entry.protein=document.getElementById("fpro").value;
+      entry.carbs=document.getElementById("fcarb").value; entry.fat=document.getElementById("ffat").value;
+    }
+    day.food=[...day.food,entry].sort((a,b)=>a.time.localeCompare(b.time)); save();
+  });
+  view().querySelectorAll("[data-delfood]").forEach(b=>b.addEventListener("click",()=>{ day.food=day.food.filter((_,i)=>i!==Number(b.dataset.delfood)); save(); }));
+
+  view().querySelectorAll("[data-drink]").forEach(b=>b.addEventListener("click",()=>{
+    const type=b.dataset.drink;
+    day.drinks=[...(day.drinks||[]),{type,oz:type==="yeti"?26:8,addin:"Nothing added",time:isToday?nowTime():""}]; save();
+  }));
+  view().querySelectorAll("[data-addin]").forEach(s=>s.addEventListener("change",e=>{ day.drinks[Number(s.dataset.addin)].addin=e.target.value; save(false); }));
+  view().querySelectorAll("[data-deldrink]").forEach(b=>b.addEventListener("click",()=>{ day.drinks=day.drinks.filter((_,i)=>i!==Number(b.dataset.deldrink)); save(); }));
+
+  const sb=document.getElementById("showbody"); if(sb) sb.addEventListener("click",()=>{ ui.showBody=true; render(); });
+  view().querySelectorAll("[data-body]").forEach(inp=>inp.addEventListener("change",e=>{ day.body[inp.dataset.body]=e.target.value; save(false); }));
+}
+
+function renderHistory(){
+  const history=store.listDays();
+  let analytics="";
+  if(history.length>=2){
+    const n=history.length; const fxTally={};
+    history.forEach(h=>(h.data.checkin.effects||[]).forEach(e=>{ fxTally[e]=(fxTally[e]||0)+1; }));
+    const fx=Object.entries(fxTally).sort((a,b)=>b[1]-a[1]).slice(0,7);
+    const maxFx=fx.length?fx[0][1]:1;
+    const chron=[...history].sort((a,b)=>a.date.localeCompare(b.date)).slice(-14);
+    const ozDays=chron.map(h=>({date:h.date,oz:totalOz(h.data)}));
+    const maxOz=Math.max(64,...ozDays.map(d=>d.oz));
+    const logged=ozDays.filter(d=>d.oz>0);
+    const avgOz=logged.length?Math.round(logged.reduce((s,d)=>s+d.oz,0)/logged.length):0;
+    const avgN=f=>{const v=history.map(h=>h.data.checkin[f]).filter(Boolean);return v.length?(v.reduce((s,x)=>s+x,0)/v.length).toFixed(1):"—";};
+    analytics=`
+    <div class="sec" style="margin-top:8px">Your patterns</div>
+    <div class="statrow">
+      <div class="stat"><div class="statnum" style="color:var(--sage)">${avgN("mood")}</div><div class="statlbl">avg mood</div></div>
+      <div class="stat"><div class="statnum" style="color:var(--amber)">${avgN("energy")}</div><div class="statlbl">avg energy</div></div>
+      <div class="stat"><div class="statnum" style="color:var(--rose)">${avgN("appetite")}</div><div class="statlbl">avg appetite</div></div>
+    </div>
+    <div class="card">
+      <div class="lbl" style="margin-bottom:10px">Most common effects · ${n} logged days</div>
+      ${fx.length===0?`<p class="note" style="margin:0">No side effects logged yet — that's a good sign.</p>`:""}
+      ${fx.map(([name,count])=>`<div class="fxrow"><span class="fxname">${esc(name)}</span>
+        <div class="fxtrack"><div class="fxbar" style="width:${(count/maxFx)*100}%"></div></div>
+        <span class="fxn">${count}/${n} d</span></div>`).join("")}
+    </div>
+    <div class="card">
+      <div class="lbl">Water intake · last ${ozDays.length} days${avgOz?` · avg ${avgOz} oz`:""}</div>
+      <div class="h2o" role="img" aria-label="Water intake chart, average ${avgOz} ounces per day">
+        ${ozDays.map(d=>`<div class="h2ocol">
+          <span class="h2ooz">${d.oz>0?d.oz:""}</span>
+          <div class="h2obar" style="height:${Math.max(2,(d.oz/maxOz)*100)}%;opacity:${d.oz>0?1:.2}"></div>
+          <span class="h2oday">${d.date.slice(5).replace("-","/")}</span>
+        </div>`).join("")}
+      </div>
+    </div>`;
+  }
+  view().innerHTML = analytics + `<div class="sec">History</div>` +
+    (history.length===0?`<p class="note">No days logged yet — today's entries will show up here.</p>`:"") +
+    history.map(h=>{
+      const m=h.data.meds,c=h.data.checkin,open=ui.openHist===h.date;
+      return `<div class="hday" data-hist="${h.date}">
+        <div class="hhead"><b>${fmtDate(h.date)}</b>
+          <div class="dots" aria-label="Doses taken">
+            <span class="dot ${m.prog?.taken?"rose":""}" title="Progesterone"></span>
+            <span class="dot ${m.testo?.taken?"amber":""}" title="Testosterone"></span>
+            <span class="dot ${m.glp?.taken?"sage":""}" title="Tirzepatide"></span>
+          </div>
+        </div>
+        ${open?`<div class="hbody">
+          <div><b>Progesterone:</b> ${m.prog?.taken?fmt12(m.prog.time):"not logged"}</div>
+          <div><b>Testosterone:</b> ${m.testo?.taken?`${fmt12(m.testo.time)} · ${m.testo.clicks} clicks${m.testo.unsure?" (unsure)":""}`:"not logged"}</div>
+          <div><b>Tirzepatide:</b> ${m.glp?.taken?fmt12(m.glp.time):"not logged"}</div>
+          ${(c.mood||c.energy||c.appetite)?`<div><b>Feeling:</b> ${[c.mood&&`mood ${c.mood}`,c.energy&&`energy ${c.energy}`,c.appetite&&`appetite ${c.appetite}`].filter(Boolean).join(" · ")}</div>`:""}
+          ${c.effects?.length?`<div><b>Effects:</b> ${c.effects.map(esc).join(", ")}</div>`:""}
+          ${c.notes?`<div><b>Notes:</b> ${esc(c.notes)}</div>`:""}
+          ${h.data.food?.length?`<div><b>Food:</b> ${h.data.food.map(f=>`${fmt12(f.time)} ${esc(f.desc)}`).join(" · ")}</div>`:""}
+          ${totalOz(h.data)>0?`<div><b>Fluids:</b> ${totalOz(h.data)} oz${(h.data.drinks||[]).some(d=>d.addin&&d.addin!=="Nothing added")?` (${h.data.drinks.filter(d=>d.addin!=="Nothing added").map(d=>esc(d.addin)).join(", ")})`:""}</div>`:""}
+          ${h.data.supp?.collagen?.taken?`<div><b>Collagen:</b> ${fmt12(h.data.supp.collagen.time)}</div>`:""}
+          ${h.data.body?.weight?`<div><b>Weight:</b> ${esc(h.data.body.weight)} lb</div>`:""}
+          <button type="button" class="btn small" data-editday="${h.date}" style="margin-top:10px">✏️ Edit this day</button>
+        </div>`:""}
+      </div>`;
+    }).join("");
+  view().querySelectorAll("[data-hist]").forEach(el=>el.addEventListener("click",e=>{
+    if(e.target.closest("[data-editday]")) return;
+    ui.openHist=ui.openHist===el.dataset.hist?null:el.dataset.hist; render();
+  }));
+  view().querySelectorAll("[data-editday]").forEach(b=>b.addEventListener("click",()=>{
+    tab="today"; setDate(b.dataset.editday);
+  }));
+}
+
+function filteredDays(){
+  const history=store.listDays();
+  if(ui.range==="all") return history;
+  const d=new Date(); d.setDate(d.getDate()-Number(ui.range));
+  const cutoff=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  return history.filter(h=>h.date>=cutoff);
+}
+
+function renderReport(){
+  const report=buildReport(filteredDays());
+  view().innerHTML = `
+  <div class="sec">Doctor report</div>
+  <p class="note" style="margin-top:0">A clean summary of your logs for Dr. Neal — copy it into a message or portal, or download the CSV for the chart.</p>
+  <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap">
+    <select id="range" aria-label="Report range">
+      <option value="7" ${ui.range==="7"?"selected":""}>Last 7 days</option>
+      <option value="14" ${ui.range==="14"?"selected":""}>Last 14 days</option>
+      <option value="30" ${ui.range==="30"?"selected":""}>Last 30 days</option>
+      <option value="all" ${ui.range==="all"?"selected":""}>Everything</option>
+    </select>
+    <button type="button" class="btn primary" id="copyreport">Copy report</button>
+    <button type="button" class="btn" id="dlcsv">Download CSV</button>
+  </div>
+  <div class="report" id="reporttext" aria-label="Report preview"></div>
+
+  <div class="sec">Backup &amp; transfer</div>
+  <div class="card">
+    <p class="note" style="margin-top:0">Your data lives in <b>this browser on this device</b>. Copy a backup now and then to keep it safe, or to move data between your phone and computer. The restore box also accepts a pasted <b>doctor report</b> from an older version of this app.</p>
+    <button type="button" class="btn primary" id="copybackup">Copy backup</button>
+    ${ui.backupText?`<textarea readonly id="backupout" style="margin-top:10px;font-family:monospace;font-size:11px">${esc(ui.backupText)}</textarea>`:""}
+    <div class="lbl" style="margin:14px 0 6px">Restore from a backup or report</div>
+    <textarea id="restorein" placeholder="Paste your backup or report text here…" style="font-family:monospace;font-size:11px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+      <button type="button" class="btn" id="restorebtn">Restore</button>
+      <span class="note" id="restoremsg" style="color:var(--sage)">${esc(ui.restoreMsg)}</span>
+    </div>
+  </div>`;
+
+  document.getElementById("reporttext").textContent=report;
+  document.getElementById("range").addEventListener("change",e=>{ ui.range=e.target.value; render(); });
+  document.getElementById("copyreport").addEventListener("click",async e=>{
+    const btn=e.target;
+    try{ await navigator.clipboard.writeText(report); btn.textContent="Copied ✓"; }
+    catch(_){ const ta=document.createElement("textarea"); ta.value=report; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); btn.textContent="Copied ✓"; }
+    setTimeout(()=>btn.textContent="Copy report",1500);
+  });
+  document.getElementById("dlcsv").addEventListener("click",()=>{
+    const blob=new Blob([buildCSV(filteredDays())],{type:"text/csv"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=`med-log-${todayKey()}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  });
+  document.getElementById("copybackup").addEventListener("click",async ()=>{
+    const days=store.listDays();
+    const payload=JSON.stringify({app:"vital-rx",exported:new Date().toISOString(),days:days.map(d=>({date:d.date,data:d.data}))});
+    ui.backupText=payload;
+    try{ await navigator.clipboard.writeText(payload); ui.restoreMsg="Backup copied to clipboard ✓"; }
+    catch(_){ ui.restoreMsg="Backup shown below — long-press to copy it."; }
+    render();
+    setTimeout(()=>{ ui.restoreMsg=""; const m=document.getElementById("restoremsg"); if(m) m.textContent=""; },3000);
+  });
+  document.getElementById("restorebtn").addEventListener("click",()=>{
+    const txt=document.getElementById("restorein").value.trim();
+    if(!txt) return;
+    let days=[];
+    try{ const parsed=JSON.parse(txt); days=parsed.days||[]; }catch(_){}
+    if(!days.length){ try{ days=parseReport(txt); }catch(_){ days=[]; } }
+    if(!Array.isArray(days)||!days.length){ ui.restoreMsg="Couldn't find any days in that text — paste a backup or a full doctor report."; render(); return; }
+    let ok=0;
+    for(const d of days){ if(d.date&&d.data){ if(store.set("day:"+d.date, d.data)) ok++; } }
+    ui.restoreMsg=`Restored ${ok} day${ok===1?"":"s"} ✓`;
+    day=mergeDay(store.get("day:"+curDate));
+    render();
+  });
+}
+
+/* ---------- tabs & boot ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{ tab=b.dataset.tab; render(); }));
+render();
+</script>
+</body>
+</html>
